@@ -32,9 +32,11 @@ switch(cmd) {
   }
   case 'create': {
     console.log(`Creating day ${dayNumber}`)
-    const template = await Deno.readTextFile('./template.ts');
+    const template = await Deno.readTextFile('./template.ts.txt');
+    const testTemplate = await Deno.readTextFile('./template.test.ts.txt');
     await ensureDir(`./days`);
     await Deno.writeTextFile(`./days/${day}.ts`, template);
+    await Deno.writeTextFile(`./days/${day}.test.ts`, testTemplate.replaceAll('{DAYNUMBER}', day));
     break;
   }
   default: {
