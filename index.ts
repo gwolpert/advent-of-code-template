@@ -1,7 +1,7 @@
 import {ensureDir} from "fs/ensure-dir";
 import {load} from "dotenv";
 import {parseArgs} from "cli/parse-args";
-import {of} from "rxjs";
+import {concat, from, type Observable} from "rxjs";
 import {Solution} from "@types";
 import {executeSolution} from "@operators";
 
@@ -27,14 +27,12 @@ if (scaffold) {
 
 const env = await load();
 const {ADVENT_YEAR, ADVENT_SESSION_TOKEN} = env;
-const file: Record<string, Solution> = await import(`./days/${dayCode}.ts`);
+const {p1, p2}: Record<string, Solution> = await import(`./days/${dayCode}.ts`);
 const request: RequestInit = {headers: {cookie: `session=${ADVENT_SESSION_TOKEN}`}};
 const response = await fetch(`https://adventofcode.com/${ADVENT_YEAR}/day/${day}/input`, request);
 if (!response.ok) throw new Error('Error while fetching input, maybe your session token is expired?');
-const input = of(await response.text());
-if (part) {
-	input.pipe(executeSolution(file[`p${part}`], {day, part})).subscribe();
-} else {
-	input.pipe(executeSolution(file['p1'], {day, part: 1})).subscribe();
-	input.pipe(executeSolution(file['p2'], {day, part: 2})).subscribe();
-}
+const input = from(response.text());
+const parts: Array<Observable<number>> = [];
+if (!part || part === 1) parts.push(input.pipe(executeSolution(p1, {day, part: 1})));
+if (!part || part === 2) parts.push(input.pipe(executeSolution(p2, {day, part: 2})));
+concat(...parts).subscribe();
