@@ -1,16 +1,17 @@
-import './extension-methods.ts'
-import {ensureDir} from "std/fs/ensure_dir.ts";
-import {load} from "std/dotenv/mod.ts";
-import {parseArgs} from "std/cli/parse_args.ts";
-import {brightBlue as blue, brightYellow as yellow, underline as ul} from "std/fmt/colors.ts";
+import {ensureDir} from "fs/ensure-dir";
+import {load} from "dotenv";
+import {parseArgs} from "cli/parse-args";
+import {of} from "rxjs";
+import {Solution} from "@types";
+import {executeSolution} from "@operators";
 
-const args = parseArgs(Deno.args, {
+type Args = { day: number, part: number, scaffold: boolean };
+
+const {day, part, scaffold} = parseArgs(Deno.args, {
 	boolean: ['scaffold'],
 	default: {day: 1, part: 0, scaffold: false}
-});
-const day: number = args.day as number;
-const part: number = args.part as number;
-const scaffold: boolean = args.scaffold as boolean;
+}) as Args;
+
 if (isNaN(day)) throw new Error('Day number provided is incorrect');
 const dayCode = `${day}`.padStart(2, '0');
 
@@ -26,18 +27,14 @@ if (scaffold) {
 
 const env = await load();
 const {ADVENT_YEAR, ADVENT_SESSION_TOKEN} = env;
-const file = await import(`./days/${dayCode}.ts`);
-const response = await fetch(`https://adventofcode.com/${ADVENT_YEAR}/day/${day}/input`, {headers: {cookie: `session=${ADVENT_SESSION_TOKEN}`}});
+const file: Record<string, Solution> = await import(`./days/${dayCode}.ts`);
+const request: RequestInit = {headers: {cookie: `session=${ADVENT_SESSION_TOKEN}`}};
+const response = await fetch(`https://adventofcode.com/${ADVENT_YEAR}/day/${day}/input`, request);
 if (!response.ok) throw new Error('Error while fetching input, maybe your session token is expired?');
-const input = await response.text();
-const runPart = (partNumber?: number): void => {
-	if (!(!part || partNumber === part)) return;
-	const timerStart = performance.now();
-	const result = file[`p${partNumber}`](input);
-	const timerEnd = performance.now() - timerStart;
-	console.log(ul(blue(`Running day ${day} part ${partNumber}:`)));
-	console.log(`${yellow('[Answer]\t')} ${result}`);
-	console.log(`${yellow('[Time]\t\t')} ~${timerEnd.toFixed(3)}ms\n`);
+const input = of(await response.text());
+if (part) {
+	input.pipe(executeSolution(file[`p${part}`], {day, part})).subscribe();
+} else {
+	input.pipe(executeSolution(file['p1'], {day, part: 1})).subscribe();
+	input.pipe(executeSolution(file['p2'], {day, part: 2})).subscribe();
 }
-runPart(1);
-runPart(2);

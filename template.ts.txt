@@ -1,11 +1,12 @@
-import '../extension-methods.ts';
+import {Solution} from '@types';
+import {count, splitRows} from "@operators";
 
-export const p1 = (input: string): number => {
-  const lines = input.splitRows().map(Number);
-  return lines.length;
-}
+export const p1: Solution = (source) => source.pipe(
+    splitRows(),
+    count()
+);
 
-export const p2 = (input: string): number => {
-  const lines = input.splitRows().map(Number);
-  return lines.length;
-}
+export const p2: Solution = (source) => source.pipe(
+    splitRows(),
+    count()
+);
