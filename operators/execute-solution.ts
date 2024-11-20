@@ -1,4 +1,4 @@
-import { first, type Observable, tap } from 'rxjs';
+import { last, type Observable, tap } from 'rxjs';
 import { ExecutionInfo, Solution } from '@types';
 import { brightBlue as blue, brightYellow as yellow, underline as ul } from 'fmt/colors';
 
@@ -12,11 +12,11 @@ export const executeSolution =
 	(solution: Solution, { day, part }: ExecutionInfo, start = performance.now()) => (source: Observable<string>) =>
 		source.pipe(
 			solution,
+			last(),
 			tap((result) => {
 				const end = performance.now() - start;
 				console.log(ul(blue(`Running day ${day} part ${part}:`)));
 				console.log(`${yellow('[Answer]\t')} ${result}`);
 				console.log(`${yellow('[Time]\t\t')} ~${end.toFixed(3)}ms\n`);
 			}),
-			first(),
 		);

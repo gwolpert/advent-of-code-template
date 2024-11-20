@@ -1,3 +1,3 @@
-import type { Observable } from 'rxjs';
+import type { Observable as $ } from 'rxjs';
 
-export type Solution = (input: Observable<string>) => Observable<number>;
+export type Solution = (input: $<string>) => $<number>;

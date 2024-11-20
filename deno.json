@@ -2,7 +2,7 @@
 	"tasks": {
 		"start": "deno run --allow-read=. --allow-net=adventofcode.com index.ts",
 		"scaffold": "deno run --allow-read=. --allow-write=./days index.ts --scaffold",
-		"test": "deno test"
+		"test": "deno test ./days"
 	},
 	"imports": {
 		"assert": "jsr:@std/assert@^1.0.8",
@@ -28,6 +28,6 @@
 		"semiColons": true,
 		"singleQuote": true,
 		"proseWrap": "preserve",
-		"include": ["days/"]
+		"include": ["days/", "operators/", "types/"]
 	}
 }

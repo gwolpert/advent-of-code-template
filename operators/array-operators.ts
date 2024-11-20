@@ -1,42 +1,58 @@
-import { map, Observable } from 'rxjs';
+import { last, map, type Observable as $, scan } from 'rxjs';
 
 /**
  * Sums all the numbers in the array
  */
-export const sum = () => (source: Observable<Array<number>>) =>
+export const sum = () => (source: $<number>) =>
 	source.pipe(
-		map((input) => input.reduce((acc, curr) => acc + +curr, 0)),
+		scan((acc, curr) => acc + +curr, 0),
+		last(),
+	);
+
+/**
+ * Multiplies all the numbers in the array
+ */
+export const product = () => (source: $<number>) =>
+	source.pipe(
+		scan((acc, curr) => acc * curr, 1),
+		last(),
 	);
 
 /**
  * Returns the highest number in the array
  */
-export const max = () => (source: Observable<Array<number>>) =>
+export const max = () => (source: $<number>) =>
 	source.pipe(
-		map((input) => Math.max(...input)),
+		scan((acc, curr) => acc > curr ? acc : curr, Number.MIN_SAFE_INTEGER),
+		last(),
 	);
 
 /**
  * Returns the lowest number in the array
  */
-export const min = () => (source: Observable<Array<number>>) =>
+export const min = () => (source: $<number>) =>
 	source.pipe(
-		map((input) => Math.min(...input)),
+		scan((acc, curr) => acc < curr ? acc : curr, Number.MAX_SAFE_INTEGER),
+		last(),
 	);
 
 /**
  * Returns the average of all the numbers in the array
  */
-export const avg = () => (source: Observable<Array<number>>) =>
+export const avg = () => (source: $<number>) =>
 	source.pipe(
-		map((input) => input.reduce((acc, curr) => acc + +curr, 0) / input.length),
+		scan(([sum, count], curr) => [sum + curr, count + 1], [0, 0]),
+		last(),
+		map(([sum, count]) => sum / count),
 	);
 
 /**
  * Sorts the array numerically
  */
-export const sortNums = () => (source: Observable<Array<number>>) =>
+export const sortNums = () => (source: $<number>) =>
 	source.pipe(
+		scan((acc, curr) => [...acc, curr], new Array<number>()),
+		last(),
 		map((input) => input.sort((a, b) => a - b)),
 	);
 
@@ -44,18 +60,8 @@ export const sortNums = () => (source: Observable<Array<number>>) =>
  * Count the amount of elements which match the predicate
  * @param predicate The predicate to match
  */
-export const count = <T>(predicate?: (item: T) => boolean) => (source: Observable<Array<T>>) =>
+export const count = <T>(predicate?: (item: T) => boolean) => (source: $<T>) =>
 	source.pipe(
-		map((input) => predicate ? input.filter(predicate).length : input.length),
+		scan((acc, curr) => acc + (predicate ? +predicate(curr) : 1), 0),
+		last(),
 	);
-
-/**
- * Reduces the array to a single value
- * @param reducer The reducer function
- * @param initialValue The initial value
- */
-export const reduceMap =
-	<TIn, TOut>(reducer: (acc: TOut, curr: TIn) => TOut, initialValue: TOut) => (source: Observable<Array<TIn>>) =>
-		source.pipe(
-			map((input) => input.reduce(reducer, initialValue)),
-		);
