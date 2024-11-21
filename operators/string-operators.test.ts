@@ -22,21 +22,21 @@ Deno.test('splitting a string into an array of strings based on two newline char
 
 Deno.test('matching a string and mapping the result', () => {
 	const input = of('a1b2c3');
-	input.pipe(matchMap(/(\w\d)/g, ([match]) => match)).subscribe((result) => {
+	input.pipe(matchMap(/(\w\d)/g, ([, match]) => match)).subscribe((result) => {
 		assertEquals(result, ['a1', 'b2', 'c3']);
 	});
 });
 
 Deno.test('matching a string and mapping the result to a number', () => {
 	const input = of('a1b2c3');
-	input.pipe(matchMap(/(\d)/g, ([x]) => +x)).subscribe((result) => {
+	input.pipe(matchMap(/(\d)/g, ([, x]) => +x)).subscribe((result) => {
 		assertEquals(result, [1, 2, 3]);
 	});
 });
 
 Deno.test('matching a string with multiple groups and mapping the result', () => {
 	const input = of('a1b2c3');
-	input.pipe(matchMap(/(\w)(\d)/g, ([char, num]) => `${char}${num}`)).subscribe((result) => {
+	input.pipe(matchMap(/(\w)(\d)/g, ([, char, num]) => `${char}${num}`)).subscribe((result) => {
 		assertEquals(result, ['a1', 'b2', 'c3']);
 	});
 });

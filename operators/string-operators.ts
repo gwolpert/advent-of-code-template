@@ -1,4 +1,13 @@
-import { concatMap, last, map, of, scan, tap, type Observable as $ } from 'rxjs';
+import { groupBy, mergeMap, type Observable as $, reduce } from 'rxjs';
+
+/**
+ * Splits a string into an array of strings based on a separator.
+ * @param separator The regex separator to split the string by.
+ */
+export const split = (separator: RegExp) => (source: $<string>) =>
+	source.pipe(
+		mergeMap((input) => input.trim().split(separator)),
+	);
 
 /**
  * Splits a string into an array of strings based on the amount of newline-characters.
@@ -6,16 +15,30 @@ import { concatMap, last, map, of, scan, tap, type Observable as $ } from 'rxjs'
  */
 export const splitRows = (length = 1) => (source: $<string>) =>
 	source.pipe(
-		concatMap((input): string[] => input.trim().split(new RegExp(`\\n{${length}}`))),
+		split(new RegExp(`\\n{${length}}`)),
 	);
 
+/**
+ * Matches a string based on a regex and groups the results by the input string.
+ * @param regex The regex to match the string by.
+ */
 export const match = (regex: RegExp) => (source: $<string>) =>
 	source.pipe(
-		map((input) => input.matchAll(regex)),
+		mergeMap((input) => input.matchAll(regex)),
+		groupBy((match) => match.input),
 	);
 
+/**
+ * Matches a string based on a regex and maps the results to a new value.
+ * @param regex The regex to match the string by.
+ * @param mapFn The function to map the results by.
+ */
 export const matchMap = <T = string>(regex: RegExp, mapFn: (match: RegExpExecArray) => T) => (source: $<string>) =>
 	source.pipe(
 		match(regex),
-		map((matches) => [...matches.map(mapFn)]),
+		mergeMap((matches) =>
+			matches.pipe(
+				reduce((acc, curr) => [...acc, mapFn(curr)], new Array<T>()),
+			)
+		),
 	);

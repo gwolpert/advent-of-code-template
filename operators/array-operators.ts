@@ -1,12 +1,11 @@
-import { last, map, type Observable as $, scan } from 'rxjs';
+import { map, type Observable as $, reduce } from 'rxjs';
 
 /**
  * Sums all the numbers in the array
  */
 export const sum = () => (source: $<number>) =>
 	source.pipe(
-		scan((acc, curr) => acc + +curr, 0),
-		last(),
+		reduce((acc, curr) => acc + +curr, 0),
 	);
 
 /**
@@ -14,8 +13,7 @@ export const sum = () => (source: $<number>) =>
  */
 export const product = () => (source: $<number>) =>
 	source.pipe(
-		scan((acc, curr) => acc * curr, 1),
-		last(),
+		reduce((acc, curr) => acc * curr, 1),
 	);
 
 /**
@@ -23,8 +21,7 @@ export const product = () => (source: $<number>) =>
  */
 export const max = () => (source: $<number>) =>
 	source.pipe(
-		scan((acc, curr) => acc > curr ? acc : curr, Number.MIN_SAFE_INTEGER),
-		last(),
+		reduce((acc, curr) => acc > curr ? acc : curr, Number.MIN_SAFE_INTEGER),
 	);
 
 /**
@@ -32,8 +29,7 @@ export const max = () => (source: $<number>) =>
  */
 export const min = () => (source: $<number>) =>
 	source.pipe(
-		scan((acc, curr) => acc < curr ? acc : curr, Number.MAX_SAFE_INTEGER),
-		last(),
+		reduce((acc, curr) => acc < curr ? acc : curr, Number.MAX_SAFE_INTEGER),
 	);
 
 /**
@@ -41,8 +37,7 @@ export const min = () => (source: $<number>) =>
  */
 export const avg = () => (source: $<number>) =>
 	source.pipe(
-		scan(([sum, count], curr) => [sum + curr, count + 1], [0, 0]),
-		last(),
+		reduce(([sum, count], curr) => [sum + curr, count + 1], [0, 0]),
 		map(([sum, count]) => sum / count),
 	);
 
@@ -51,8 +46,7 @@ export const avg = () => (source: $<number>) =>
  */
 export const sortNums = () => (source: $<number>) =>
 	source.pipe(
-		scan((acc, curr) => [...acc, curr], new Array<number>()),
-		last(),
+		reduce((acc, curr) => [...acc, curr], new Array<number>()),
 		map((input) => input.sort((a, b) => a - b)),
 	);
 
@@ -62,6 +56,5 @@ export const sortNums = () => (source: $<number>) =>
  */
 export const count = <T>(predicate?: (item: T) => boolean) => (source: $<T>) =>
 	source.pipe(
-		scan((acc, curr) => acc + (predicate ? +predicate(curr) : 1), 0),
-		last(),
+		reduce((acc, curr) => acc + (predicate ? +predicate(curr) : 1), 0),
 	);
