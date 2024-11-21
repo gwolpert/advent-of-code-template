@@ -1,4 +1,4 @@
-import { groupBy, mergeMap, type Observable as $, reduce } from 'rxjs';
+import { groupBy, mergeMap, tap, map, type Observable as $, reduce, of } from 'rxjs';
 
 /**
  * Splits a string into an array of strings based on a separator.
@@ -24,8 +24,7 @@ export const splitRows = (length = 1) => (source: $<string>) =>
  */
 export const match = (regex: RegExp) => (source: $<string>) =>
 	source.pipe(
-		mergeMap((input) => input.matchAll(regex)),
-		groupBy((match) => match.input),
+		map((input) => of(...input.matchAll(regex))),
 	);
 
 /**
